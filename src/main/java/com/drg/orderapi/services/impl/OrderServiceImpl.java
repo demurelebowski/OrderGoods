@@ -76,12 +76,8 @@ public class OrderServiceImpl implements OrderService {
 	public void deleteNotPaidOrdersOlderThanTenMinutes() {
 		try {
 			List<Order> ordersToDelete = findNotPaidOrdersOlderThanTenMinutes();
-
-			for (Order order : ordersToDelete) {
-				restoreProductQuantities(order);
-				repository.delete(order);
-			}
-
+			restoreProductQuantities(ordersToDelete);
+			repository.deleteAll(ordersToDelete);
 		} catch (Exception e) {
 			log.error("An error occurred while attempting to automatically delete unpaid orders.", e);
 		}
@@ -105,23 +101,31 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	private void updateProductQuantities(Order order) {
-		for (OrderItem item : order.getItems()) {
-			Product product = getProductById(item.getProduct()
-					.getId());
-			setNewQuantityForProduct(product, product.getQuantity() - item.getQuantity());
-		}
+		List<Product> productList = order.getItems()
+				.stream()
+				.map(orderItem -> {
+					Product product = getProductById(orderItem.getProduct()
+							.getId());
+					product.setQuantity(product.getQuantity() - orderItem.getQuantity());
+					return product;
+				})
+				.collect(Collectors.toList());
+
+		productRepository.saveAll(productList);
 	}
 
-	private void restoreProductQuantities(Order order) {
-		for (OrderItem item : order.getItems()) {
-			Product product = item.getProduct();
-			setNewQuantityForProduct(product, product.getQuantity() + item.getQuantity());
-		}
-	}
+	private void restoreProductQuantities(List<Order> orders) {
+		List<Product> productList = orders.stream()
+				.flatMap(order -> order.getItems()
+						.stream())
+				.map(orderItem -> {
+					Product product = orderItem.getProduct();
+					product.setQuantity(product.getQuantity() + orderItem.getQuantity());
+					return product;
+				})
+				.collect(Collectors.toList());
 
-	private void setNewQuantityForProduct(Product product, Integer quantity) {
-		product.setQuantity(quantity);
-		productRepository.save(product);
+		productRepository.saveAll(productList);
 	}
 
 	private Product getProductById(Long productId) {
