@@ -12,7 +12,7 @@ public class OrderCleanupTask {
 		this.service = service;
 	}
 
-	@Scheduled(fixedDelay = 600000) // 10 minutes in milliseconds
+	@Scheduled(fixedDelay = 60000)
 	public void deleteExpiredOrders() {
 		service.deleteNotPaidOrdersOlderThanTenMinutes();
 	}

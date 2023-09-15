@@ -4,7 +4,6 @@ import com.drg.orderapi.dto.OrderDTO;
 import com.drg.orderapi.entities.Order;
 import com.drg.orderapi.entities.OrderItem;
 import com.drg.orderapi.entities.Product;
-import com.drg.orderapi.enums.OrderStatus;
 import com.drg.orderapi.exceptions.InsufficientProductQuantityException;
 import com.drg.orderapi.exceptions.OrderNotFoundException;
 import com.drg.orderapi.exceptions.ProductNotFoundException;
@@ -12,6 +11,7 @@ import com.drg.orderapi.exceptions.ValidationException;
 import com.drg.orderapi.repositories.OrderRepository;
 import com.drg.orderapi.repositories.ProductRepository;
 import com.drg.orderapi.services.OrderService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
 	private final OrderRepository repository;
@@ -82,8 +83,7 @@ public class OrderServiceImpl implements OrderService {
 			}
 
 		} catch (Exception e) {
-			System.out.println("An error occurred while attempting to automatically delete unpaid orders.");
-			e.printStackTrace();
+			log.error("An error occurred while attempting to automatically delete unpaid orders.", e);
 		}
 	}
 
@@ -91,11 +91,7 @@ public class OrderServiceImpl implements OrderService {
 		Instant tenMinutesAgo = Instant.now()
 				.minus(10, ChronoUnit.MINUTES);
 
-		return repository.findAll()
-				.stream()
-				.filter(order -> OrderStatus.WAITING.equals(order.getStatus()) && order.getMoment()
-						.isBefore(tenMinutesAgo))
-				.collect(Collectors.toList());
+		return repository.findNotPaidOrdersOlderThanTenMinutes(tenMinutesAgo);
 	}
 
 	private void checkProductAvailability(Order order) {

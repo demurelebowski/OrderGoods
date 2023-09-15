@@ -46,11 +46,9 @@ public class Order {
 	private List<OrderItem> items = new ArrayList<>();
 
 	public double getTotal() {
-		double sum = 0.0;
-		for (OrderItem item : items) {
-			sum += item.getSubTotal();
-		}
-		return sum;
+		return items.stream()
+				.mapToDouble(OrderItem::getSubTotal)
+				.sum();
 	}
 
 	public List<OrderItem> getItems() {
