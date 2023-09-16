@@ -125,6 +125,14 @@ public class OrderServiceImplTest {
 	}
 
 	@Test
+	public void testUpdate_OrderIdIsNull() {
+		Order order = new Order(null, Instant.now(), OrderStatus.WAITING, new Client(), new ArrayList<>());
+		OrderDTO orderDTO = new OrderDTO(order);
+
+		assertThrows(ValidationException.class, () -> orderService.update(orderDTO));
+	}
+
+	@Test
 	public void testDeleteNotPaidOrdersOlderThanTenMinutesException() {
 		Instant tenMinutesAgo = Instant.now()
 				.minus(10, ChronoUnit.MINUTES);
