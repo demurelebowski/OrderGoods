@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,9 +17,7 @@ public class OrderDTO {
 	private Long id;
 	private Instant moment;
 	private OrderStatus status;
-	@NotNull(message = "Client can't be null or empty")
 	private ClientDTO client;
-	@NotNull(message = "Items can't be null or empty")
 	private List<OrderItemDTO> items;
 	private Double getTotal;
 

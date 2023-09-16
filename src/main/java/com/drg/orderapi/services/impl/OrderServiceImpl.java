@@ -107,6 +107,9 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	private void checkProductAvailability(Order order) {
+		if (order.getItems() == null) {
+			throw new ValidationException("Items can not be null");
+		}
 		for (OrderItem item : order.getItems()) {
 			Product product = getProductById(item.getProduct()
 					.getId());
