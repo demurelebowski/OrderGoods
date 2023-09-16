@@ -51,7 +51,7 @@ public class OrderController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "201", description = "Order created with success."),
 			@ApiResponse(responseCode = "400", description = "Problem with request.") })
 	public ResponseEntity<OrderDTO> insert(@RequestBody @Valid OrderDTO order) {
-		var createdOrder = service.insert(order);
+		OrderDTO createdOrder = service.insert(order);
 		var uri = ServletUriComponentsBuilder.fromCurrentRequest()
 				.path("{/id}")
 				.buildAndExpand(createdOrder.getId())
@@ -66,12 +66,7 @@ public class OrderController {
 			@ApiResponse(responseCode = "404", description = "Order not found."), @ApiResponse(responseCode = "400", description = "Problem with request.") })
 
 	public ResponseEntity<OrderDTO> update(@RequestBody @Valid OrderDTO order) {
-		var updatedOrder = service.update(order);
-		var uri = ServletUriComponentsBuilder.fromCurrentRequest()
-				.path("{/id}")
-				.buildAndExpand(updatedOrder.getId())
-				.toUri();
-		return ResponseEntity.created(uri)
-				.body(updatedOrder);
+		OrderDTO updatedOrder = service.update(order);
+		return ResponseEntity.ok(updatedOrder);
 	}
 }

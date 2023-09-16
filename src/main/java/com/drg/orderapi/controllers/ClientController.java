@@ -52,7 +52,7 @@ public class ClientController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "201", description = "Client created with success."),
 			@ApiResponse(responseCode = "400", description = "Problem with request.") })
 	public ResponseEntity<ClientDTO> insert(@RequestBody @Valid ClientDTO client) {
-		var createdClient = service.insert(client);
+		ClientDTO createdClient = service.insert(client);
 		var uri = ServletUriComponentsBuilder.fromCurrentRequest()
 				.path("{/id}")
 				.buildAndExpand(createdClient.getId())

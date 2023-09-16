@@ -61,7 +61,7 @@ public class ProductController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "201", description = "Product created with success."),
 			@ApiResponse(responseCode = "400", description = "Problem with request.") })
 	public ResponseEntity<ProductDTO> insert(@RequestBody @Valid ProductDTO product) {
-		var createdProduct = service.insert(product);
+		ProductDTO createdProduct = service.insert(product);
 		var uri = ServletUriComponentsBuilder.fromCurrentRequest()
 				.path("{/id}")
 				.buildAndExpand(createdProduct.getId())
