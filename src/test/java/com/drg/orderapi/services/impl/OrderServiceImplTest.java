@@ -4,7 +4,9 @@ import com.drg.orderapi.dto.OrderDTO;
 import com.drg.orderapi.entities.Client;
 import com.drg.orderapi.entities.Order;
 import com.drg.orderapi.enums.OrderStatus;
+import com.drg.orderapi.exceptions.ClientNotFoundException;
 import com.drg.orderapi.exceptions.OrderNotFoundException;
+import com.drg.orderapi.exceptions.ValidationException;
 import com.drg.orderapi.repositories.ClientRepository;
 import com.drg.orderapi.repositories.OrderRepository;
 import com.drg.orderapi.repositories.ProductRepository;
@@ -25,8 +27,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class OrderServiceImplTest {
 
@@ -39,6 +41,7 @@ public class OrderServiceImplTest {
 	private ProductRepository productRepository;
 	@Mock
 	private ClientRepository clientRepository;
+	private final Client templateClient = new Client(1L, "Test", "test@gmail.com", "", "", "", "", "", "");
 
 	@BeforeEach
 	public void setUp() {
@@ -78,11 +81,30 @@ public class OrderServiceImplTest {
 	}
 
 	@Test
-	public void testInsert() {
+	public void testInsert_ClientIdNull() {
 		Order order = new Order(1L, Instant.now(), OrderStatus.WAITING, new Client(), new ArrayList<>());
 		OrderDTO orderDTO = new OrderDTO(order);
 		when(orderRepository.save(any(Order.class))).thenReturn(order);
 
+		assertThrows(ClientNotFoundException.class, () -> orderService.insert(orderDTO));
+	}
+
+	@Test
+	public void testInsert_ItemsIsNull() {
+		Order order = new Order(1L, Instant.now(), OrderStatus.WAITING, templateClient, null);
+		OrderDTO orderDTO = new OrderDTO(order);
+		when(orderRepository.save(any(Order.class))).thenReturn(order);
+		when(clientRepository.findById(1L)).thenReturn(java.util.Optional.of(templateClient));
+
+		assertThrows(ValidationException.class, () -> orderService.insert(orderDTO));
+	}
+
+	@Test
+	public void testInsert() {
+		Order order = new Order(1L, Instant.now(), OrderStatus.WAITING, templateClient, new ArrayList<>());
+		OrderDTO orderDTO = new OrderDTO(order);
+		when(orderRepository.save(any(Order.class))).thenReturn(order);
+		when(clientRepository.findById(1L)).thenReturn(java.util.Optional.of(templateClient));
 		OrderDTO savedOrderDTO = orderService.insert(orderDTO);
 
 		assertNotNull(savedOrderDTO);

@@ -32,6 +32,6 @@ public class OrderDTO {
 						.stream()
 						.map(OrderItemDTO::new)
 						.collect(Collectors.toList());
-		getTotal = order.getTotal();
+		getTotal = order.getItems() == null ? null : order.getTotal();
 	}
 }
