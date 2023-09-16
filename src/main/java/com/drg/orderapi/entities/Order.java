@@ -5,6 +5,7 @@ import com.drg.orderapi.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -51,22 +52,20 @@ public class Order {
 				.sum();
 	}
 
-	public List<OrderItem> getItems() {
-		return items;
-	}
-
-	public Order(OrderDTO orderDTO) {
+	public Order(@NonNull OrderDTO orderDTO) {
 		this.id = orderDTO.getId();
 		this.status = orderDTO.getStatus() != null ? orderDTO.getStatus() : OrderStatus.WAITING;
-		this.client = new Client(orderDTO.getClient());
+		this.client = orderDTO.getClient() != null ? new Client(orderDTO.getClient()) : null;
 		this.moment = orderDTO.getMoment() != null ? orderDTO.getMoment() : Instant.now();
-		this.items = orderDTO.getItems()
-				.stream()
-				.map(item -> {
-					OrderItem orderItem = new OrderItem(item);
-					orderItem.setOrder(this);
-					return orderItem;
-				})
-				.collect(Collectors.toList());
+		this.items = orderDTO.getItems() == null ?
+				null :
+				orderDTO.getItems()
+						.stream()
+						.map(item -> {
+							OrderItem orderItem = new OrderItem(item);
+							orderItem.setOrder(this);
+							return orderItem;
+						})
+						.collect(Collectors.toList());
 	}
 }

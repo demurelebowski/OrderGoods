@@ -1,13 +1,16 @@
 package com.drg.orderapi.services.impl;
 
 import com.drg.orderapi.dto.OrderDTO;
+import com.drg.orderapi.entities.Client;
 import com.drg.orderapi.entities.Order;
 import com.drg.orderapi.entities.OrderItem;
 import com.drg.orderapi.entities.Product;
+import com.drg.orderapi.exceptions.ClientNotFoundException;
 import com.drg.orderapi.exceptions.InsufficientProductQuantityException;
 import com.drg.orderapi.exceptions.OrderNotFoundException;
 import com.drg.orderapi.exceptions.ProductNotFoundException;
 import com.drg.orderapi.exceptions.ValidationException;
+import com.drg.orderapi.repositories.ClientRepository;
 import com.drg.orderapi.repositories.OrderRepository;
 import com.drg.orderapi.repositories.ProductRepository;
 import com.drg.orderapi.services.OrderService;
@@ -26,10 +29,12 @@ public class OrderServiceImpl implements OrderService {
 
 	private final OrderRepository repository;
 	private final ProductRepository productRepository;
+	private final ClientRepository clientRepository;
 
-	public OrderServiceImpl(OrderRepository repository, ProductRepository productRepository) {
+	public OrderServiceImpl(OrderRepository repository, ProductRepository productRepository, ClientRepository clientRepository) {
 		this.repository = repository;
 		this.productRepository = productRepository;
+		this.clientRepository = clientRepository;
 	}
 
 	@Override
@@ -57,11 +62,20 @@ public class OrderServiceImpl implements OrderService {
 	@Transactional
 	public OrderDTO insert(OrderDTO orderDTO) {
 		Order order = new Order(orderDTO);
+		checkClient(order.getClient());
 		checkProductAvailability(order);
 		Order orderSaved = repository.save(order);
 		updateProductQuantities(order);
 
 		return new OrderDTO(orderSaved);
+	}
+
+	private void checkClient(Client client) {
+		if (client == null) {
+			throw new ValidationException("Client can not be null.");
+		}
+		clientRepository.findById(client.getId())
+				.orElseThrow(() -> new ClientNotFoundException(client.getId()));
 	}
 
 	public OrderDTO update(OrderDTO orderDTO) {
@@ -76,8 +90,10 @@ public class OrderServiceImpl implements OrderService {
 	public void deleteNotPaidOrdersOlderThanTenMinutes() {
 		try {
 			List<Order> ordersToDelete = findNotPaidOrdersOlderThanTenMinutes();
-			restoreProductQuantities(ordersToDelete);
-			repository.deleteAll(ordersToDelete);
+			if (!ordersToDelete.isEmpty()) {
+				restoreProductQuantities(ordersToDelete);
+				repository.deleteAll(ordersToDelete);
+			}
 		} catch (Exception e) {
 			log.error("An error occurred while attempting to automatically delete unpaid orders.", e);
 		}

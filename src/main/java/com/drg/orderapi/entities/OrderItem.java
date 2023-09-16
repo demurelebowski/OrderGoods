@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -41,10 +42,10 @@ public class OrderItem {
 	@JoinColumn(name = "order_id")
 	private Order order;
 
-	public OrderItem(OrderItemDTO item) {
+	public OrderItem(@NonNull OrderItemDTO item) {
 		this.price = item.getPrice();
 		this.quantity = item.getQuantity();
-		this.product = new Product(item.getId());
+		this.product = item.getId() == null ? null : new Product(item.getId());
 		this.order = new Order();
 		this.price = item.getPrice();
 	}

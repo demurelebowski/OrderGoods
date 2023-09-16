@@ -3,6 +3,7 @@ package com.drg.orderapi.dto;
 import com.drg.orderapi.entities.Product;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -22,7 +23,7 @@ public class ProductDTO {
 	@NotNull(message = "Quantity can't be null or empty")
 	private Integer quantity;
 
-	public ProductDTO(Product product) {
+	public ProductDTO(@NonNull Product product) {
 		id = product.getId();
 		name = product.getName();
 		price = product.getPrice();

@@ -3,6 +3,7 @@ package com.drg.orderapi.entities;
 import com.drg.orderapi.dto.ClientDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import javax.persistence.Column;
@@ -47,7 +48,7 @@ public class Client {
 	@Column(nullable = false)
 	private String zipCode;
 
-	public Client(ClientDTO clientDTO) {
+	public Client(@NonNull ClientDTO clientDTO) {
 		this.id = clientDTO.getId();
 		this.name = clientDTO.getName();
 		this.email = clientDTO.getEmail();

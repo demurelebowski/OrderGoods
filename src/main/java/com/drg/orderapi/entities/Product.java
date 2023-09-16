@@ -4,6 +4,7 @@ import com.drg.orderapi.dto.ProductDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -32,13 +33,13 @@ public class Product {
 	@Column(nullable = false)
 	private Integer quantity;
 
-	public Product(ProductDTO productDTO) {
+	public Product(@NonNull ProductDTO productDTO) {
 		this.name = productDTO.getName();
 		this.price = productDTO.getPrice();
 		this.quantity = productDTO.getQuantity();
 	}
 
-	public Product(Long id) {
+	public Product(@NonNull Long id) {
 		this.id = id;
 	}
 }

@@ -3,6 +3,7 @@ package com.drg.orderapi.dto;
 import com.drg.orderapi.entities.Client;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Data
 @NoArgsConstructor
@@ -18,7 +19,7 @@ public class ClientDTO {
 	private String homeNumber;
 	private String zipCode;
 
-	public ClientDTO(Client client) {
+	public ClientDTO(@NonNull Client client) {
 		this.id = client.getId();
 		this.name = client.getName();
 		this.email = client.getEmail();
