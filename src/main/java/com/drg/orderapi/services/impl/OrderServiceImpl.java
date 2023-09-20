@@ -94,9 +94,9 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Transactional
-	public void deleteOldNotPaidOrders() {
+	public void deleteExpiredNotPaidOrders() {
 		try {
-			List<Order> ordersToDelete = findOldNotPaidOrders();
+			List<Order> ordersToDelete = findExpiredNotPaidOrders();
 			if (!ordersToDelete.isEmpty()) {
 				restoreProductQuantities(ordersToDelete);
 				setOrdersStatus(ordersToDelete, OrderStatus.DELETED);
@@ -112,11 +112,11 @@ public class OrderServiceImpl implements OrderService {
 				.forEach(order -> order.setStatus(status));
 	}
 
-	private List<Order> findOldNotPaidOrders() {
+	private List<Order> findExpiredNotPaidOrders() {
 		Instant minutesAgo = Instant.now()
 				.minus(notPaidOrdersThresholdMinutes, ChronoUnit.MINUTES);
 
-		return repository.findOldNotPaidOrders(minutesAgo);
+		return repository.findExpiredNotPaidOrders(minutesAgo);
 	}
 
 	private void checkProductAvailability(Order order) {

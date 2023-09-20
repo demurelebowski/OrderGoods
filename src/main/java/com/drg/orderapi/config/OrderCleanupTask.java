@@ -17,6 +17,6 @@ public class OrderCleanupTask {
 
 	@Scheduled(fixedDelayString = "${order.cleanup.fixedDelay}")
 	public void deleteExpiredOrders() {
-		service.deleteOldNotPaidOrders();
+		service.deleteExpiredNotPaidOrders();
 	}
 }

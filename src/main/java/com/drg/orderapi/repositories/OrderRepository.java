@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 	@Query("SELECT o FROM Order o WHERE o.status = 0 AND o.moment < :minutesAgo")
-	List<Order> findOldNotPaidOrders(Instant minutesAgo);
+	List<Order> findExpiredNotPaidOrders(Instant minutesAgo);
 }
