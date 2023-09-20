@@ -15,6 +15,7 @@ import com.drg.orderapi.repositories.OrderRepository;
 import com.drg.orderapi.repositories.ProductRepository;
 import com.drg.orderapi.services.OrderService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,8 @@ public class OrderServiceImpl implements OrderService {
 	private final OrderRepository repository;
 	private final ProductRepository productRepository;
 	private final ClientRepository clientRepository;
+	@Value("${order.cleanup.notPaidOrdersThresholdMinutes}")
+	private int notPaidOrdersThresholdMinutes;
 
 	public OrderServiceImpl(OrderRepository repository, ProductRepository productRepository, ClientRepository clientRepository) {
 		this.repository = repository;
@@ -38,6 +41,7 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<OrderDTO> findAll() {
 		List<Order> list = repository.findAll();
 		return list.stream()
@@ -46,6 +50,7 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public OrderDTO findById(Long id) {
 		return new OrderDTO(FindOrderById(id));
 	}
@@ -78,6 +83,7 @@ public class OrderServiceImpl implements OrderService {
 				.orElseThrow(() -> new ClientNotFoundException(client.getId()));
 	}
 
+	@Transactional
 	public OrderDTO update(OrderDTO orderDTO) {
 		Order existingOrder = FindOrderById(orderDTO.getId());
 		existingOrder.setStatus(orderDTO.getStatus());
@@ -87,9 +93,9 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Transactional
-	public void deleteNotPaidOrdersOlderThanTenMinutes() {
+	public void deleteOldNotPaidOrders() {
 		try {
-			List<Order> ordersToDelete = findNotPaidOrdersOlderThanTenMinutes();
+			List<Order> ordersToDelete = findOldNotPaidOrders();
 			if (!ordersToDelete.isEmpty()) {
 				restoreProductQuantities(ordersToDelete);
 				repository.deleteAll(ordersToDelete);
@@ -99,11 +105,11 @@ public class OrderServiceImpl implements OrderService {
 		}
 	}
 
-	private List<Order> findNotPaidOrdersOlderThanTenMinutes() {
-		Instant tenMinutesAgo = Instant.now()
-				.minus(10, ChronoUnit.MINUTES);
+	private List<Order> findOldNotPaidOrders() {
+		Instant minutesAgo = Instant.now()
+				.minus(notPaidOrdersThresholdMinutes, ChronoUnit.MINUTES);
 
-		return repository.findNotPaidOrdersOlderThanTenMinutes(tenMinutesAgo);
+		return repository.findOldNotPaidOrders(minutesAgo);
 	}
 
 	private void checkProductAvailability(Order order) {

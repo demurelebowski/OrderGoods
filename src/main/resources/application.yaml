@@ -14,3 +14,7 @@ spring:
 server:
   error:
     include-message: always
+order:
+  cleanup:
+    fixedDelay: 60000
+    notPaidOrdersThresholdMinutes: 10

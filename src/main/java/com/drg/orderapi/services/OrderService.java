@@ -14,5 +14,5 @@ public interface OrderService {
 
 	OrderDTO update(OrderDTO order);
 
-	void deleteNotPaidOrdersOlderThanTenMinutes();
+	void deleteOldNotPaidOrders();
 }

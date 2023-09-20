@@ -136,9 +136,9 @@ public class OrderServiceImplTest {
 	public void testDeleteNotPaidOrdersOlderThanTenMinutesException() {
 		Instant tenMinutesAgo = Instant.now()
 				.minus(10, ChronoUnit.MINUTES);
-		when(orderRepository.findNotPaidOrdersOlderThanTenMinutes(tenMinutesAgo)).thenThrow(new RuntimeException());
+		when(orderRepository.findOldNotPaidOrders(tenMinutesAgo)).thenThrow(new RuntimeException());
 
-		assertDoesNotThrow(() -> orderService.deleteNotPaidOrdersOlderThanTenMinutes());
+		assertDoesNotThrow(() -> orderService.deleteOldNotPaidOrders());
 	}
 
 	@Test
@@ -151,9 +151,9 @@ public class OrderServiceImplTest {
 		unpaidOrders.add(unpaidOrder1);
 		unpaidOrders.add(unpaidOrder2);
 
-		when(orderRepository.findNotPaidOrdersOlderThanTenMinutes(any(Instant.class))).thenReturn(unpaidOrders);
+		when(orderRepository.findOldNotPaidOrders(any(Instant.class))).thenReturn(unpaidOrders);
 
-		orderService.deleteNotPaidOrdersOlderThanTenMinutes();
+		orderService.deleteOldNotPaidOrders();
 
 		verify(orderRepository, times(1)).deleteAll(unpaidOrders);
 	}
@@ -161,9 +161,9 @@ public class OrderServiceImplTest {
 	@Test
 	public void testDeleteNotPaidOrdersOlderThanTenMinutes_NoOrdersToDelete() {
 		List<Order> orders = new ArrayList<>();
-		when(orderRepository.findNotPaidOrdersOlderThanTenMinutes(any(Instant.class))).thenReturn(orders);
+		when(orderRepository.findOldNotPaidOrders(any(Instant.class))).thenReturn(orders);
 
-		orderService.deleteNotPaidOrdersOlderThanTenMinutes();
+		orderService.deleteOldNotPaidOrders();
 
 		verify(orderRepository, never()).deleteAll(orders);
 	}
