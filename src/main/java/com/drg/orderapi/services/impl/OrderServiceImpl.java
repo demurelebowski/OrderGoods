@@ -5,6 +5,7 @@ import com.drg.orderapi.entities.Client;
 import com.drg.orderapi.entities.Order;
 import com.drg.orderapi.entities.OrderItem;
 import com.drg.orderapi.entities.Product;
+import com.drg.orderapi.enums.OrderStatus;
 import com.drg.orderapi.exceptions.ClientNotFoundException;
 import com.drg.orderapi.exceptions.InsufficientProductQuantityException;
 import com.drg.orderapi.exceptions.OrderNotFoundException;
@@ -98,11 +99,17 @@ public class OrderServiceImpl implements OrderService {
 			List<Order> ordersToDelete = findOldNotPaidOrders();
 			if (!ordersToDelete.isEmpty()) {
 				restoreProductQuantities(ordersToDelete);
-				repository.deleteAll(ordersToDelete);
+				setOrdersStatus(ordersToDelete, OrderStatus.DELETED);
+				repository.saveAll(ordersToDelete);
 			}
 		} catch (Exception e) {
 			log.error("An error occurred while attempting to automatically delete unpaid orders.", e);
 		}
+	}
+
+	private void setOrdersStatus(List<Order> listOrders, OrderStatus status) {
+		listOrders
+				.forEach(order -> order.setStatus(status));
 	}
 
 	private List<Order> findOldNotPaidOrders() {
