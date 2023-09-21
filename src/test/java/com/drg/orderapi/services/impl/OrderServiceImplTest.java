@@ -165,7 +165,7 @@ public class OrderServiceImplTest {
 
 		orderService.deleteExpiredNotPaidOrders();
 
-		verify(orderRepository, never()).deleteAll(orders);
+		verify(orderRepository, never()).saveAll(orders);
 	}
 
 }
